@@ -2,130 +2,20 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Conferência - Scanner por Câmera</title>
+    <title>Conferência - Scanner</title>
     <style>
-        body { font-family: Arial; background: #1e3c72; padding: 20px; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
-        button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        .drop-area { border: 2px dashed #1e3c72; padding: 30px; text-align: center; margin: 10px 0; cursor: pointer; background: #f8f9fa; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        .ok { background: #c6f6d5; padding: 10px; margin: 5px 0; border-left: 4px solid #48bb78; }
-        .erro { background: #fed7d7; padding: 10px; margin: 5px 0; border-left: 4px solid #e53e3e; }
-        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 150px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        h2 { margin-top: 0; }
-        .nota-card { border-left: 3px solid #1e3c72; padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 5px; }
-        .ean-item { display: inline-block; background: #1e3c72; color: white; padding: 5px 10px; margin: 3px; border-radius: 3px; font-size: 11px; cursor: pointer; }
-        .progress-bar { background: #ddd; border-radius: 10px; height: 20px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { background: #48bb78; height: 100%; width: 0%; }
-        .scanner-input { font-size: 18px; font-family: monospace; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
-        th { background: #1e3c72; color: white; }
-        .btn-salvar { background: #48bb78; }
-        .btn-camera { background: #ed8936; margin-left: 10px; }
-        .btn-camera:hover { background: #dd6b20; }
-        .camera-area { 
-            display: none; 
-            position: fixed; 
-            top: 0; left: 0; 
-            width: 100%; height: 100%; 
-            background: rgba(0,0,0,0.9); 
-            z-index: 1000;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-        }
-        .camera-area video {
-            width: 90%;
-            max-width: 500px;
-            border-radius: 10px;
-        }
-        .close-camera {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            background: white;
-            border: none;
-            font-size: 24px;
-            cursor: pointer;
-            padding: 10px 15px;
-            border-radius: 50%;
-        }
-        @media (max-width: 768px) {
-            .btn-camera { width: auto; padding: 10px 15px; font-size: 14px; }
-            .scanner-input { font-size: 16px; }
-        }
+        /* Seu CSS existente */
     </style>
 </head>
 <body>
-<div class="card">
-    <h2>📦 CONFERÊNCIA DE MERCADORIAS</h2>
-    <div class="form-row">
-        <div class="form-group"><label>📅 Data:</label><input type="date" id="data"></div>
-        <div class="form-group"><label>🔒 Lacre:</label><input type="text" id="lacre"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>🏢 Loja:</label><input type="text" id="lojaNum"></div>
-        <div class="form-group"><label>📛 Nome Loja:</label><input type="text" id="lojaNome"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>👤 Operador:</label><input type="text" id="operador"></div>
-        <div class="form-group"><label>🚛 Placa:</label><input type="text" id="placa"></div>
-    </div>
-    <button id="iniciarBtn">🚀 INICIAR</button>
-</div>
-
-<div id="conferenciaArea" style="display:none;">
-    <div class="card">
-        <div id="dropArea" class="drop-area">📁 ARRASTE O ZIP OU EXCEL AQUI</div>
-        <div id="statusMsg"></div>
-    </div>
-    <div class="card"><div id="resumoDiv"></div></div>
-    <div class="card">
-        <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap;">
-            <div style="flex: 1;">
-                <input type="text" id="scannerInput" class="scanner-input" placeholder="Digite ou escaneie o código..." autofocus>
-            </div>
-            <button id="cameraBtn" class="btn-camera">📷 CÂMERA</button>
-        </div>
-        <div style="background: #f0f4f8; padding: 10px; text-align: center; border-radius: 5px; margin-top: 10px;">
-            🔍 Scanner automático - 13 dígitos
-        </div>
-        <div id="scanResultDiv"></div>
-    </div>
-    <div class="card">
-        <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
-        <div id="progressoTexto" style="text-align:center;"></div>
-        <div id="notasDiv"></div>
-    </div>
-    <div class="card">
-        <button id="relatorioBtn">📄 RELATÓRIO</button>
-        <button id="encerrarBtn" style="background:#e53e3e;">🗑️ ENCERRAR</button>
-    </div>
-</div>
-
-<!-- Área da câmera -->
-<div id="cameraArea" class="camera-area">
-    <button class="close-camera" id="closeCameraBtn">✕</button>
-    <video id="video" autoplay playsinline></video>
-    <button id="capturarBtn" style="margin-top: 20px; background: #48bb78; padding: 15px 30px;">📸 CAPTURAR CÓDIGO</button>
-</div>
+<!-- Seu HTML existente -->
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/@zxing/library@0.20.0/umd/index.min.js"></script>
 <script>
 let dados = { notas: [] };
 let ultimoCodigo = '';
 let processando = false;
-
-// Elementos da câmera
-const cameraArea = document.getElementById('cameraArea');
-const video = document.getElementById('video');
-let codeReader = null;
-let videoStream = null;
 
 function salvarProgresso() {
     if (dados.notas.length === 0) return;
@@ -148,6 +38,7 @@ function restaurarProgresso() {
         document.getElementById('conferenciaArea').style.display = 'block';
         atualizarTudo();
         document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado!</div>';
+        adicionarUploadArquivo();
         return true;
     }
     return false;
@@ -164,6 +55,7 @@ document.getElementById('iniciarBtn').onclick = () => {
     dados = { data, lacre, lojaNum, lojaNome, operador, placa: placa || 'N/A', notas: [] };
     document.querySelector('.card').style.display = 'none';
     document.getElementById('conferenciaArea').style.display = 'block';
+    setTimeout(adicionarUploadArquivo, 100);
 };
 
 function converterNumero(valor) {
@@ -270,13 +162,64 @@ scanner.addEventListener('input', function(e) {
         setTimeout(() => processarEAN(cod), 30);
     }
 });
+
+function processarEAN(cod) {
+    let achou = false;
+    for (let nota of dados.notas) {
+        for (let item of nota.itens) {
+            if (item.ean === cod) {
+                item.conf++;
+                achou = true;
+                let msg = item.conf === item.qtd ? '✅ CONFERIDO' : (item.conf > item.qtd ? '⚠️ SOBRA' : '🔄 PARCIAL');
+                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
+                document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
+                setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
+                atualizarTudo();
+                salvarProgresso();
+                break;
+            }
+        }
+        if (achou) break;
+    }
+    if (!achou) {
+        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">❌ Código ${cod} não encontrado!</div>`;
+        setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
+    }
+    scanner.value = '';
+    scanner.focus();
+    setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
+}
+
 // =============================================
-// UPLOAD DE ARQUIVOS PARA CELULAR
+// UPLOAD DE ARQUIVOS - VERSÃO CORRIGIDA
 // =============================================
 
 function adicionarUploadArquivo() {
-    let cardBody = document.querySelector('#conferenciaArea .card:nth-child(3) .card-body');
+    // Procura o card do scanner de forma mais robusta
+    let scannerCard = null;
+    let cards = document.querySelectorAll('#conferenciaArea .card');
+    
+    for (let card of cards) {
+        let header = card.querySelector('.card-header');
+        if (header && header.innerText.includes('SCANNER')) {
+            scannerCard = card;
+            break;
+        }
+    }
+    
+    if (!scannerCard) {
+        // Se não encontrou pelo header, tenta pelo terceiro card
+        scannerCard = document.querySelector('#conferenciaArea .card:nth-child(3)');
+    }
+    
+    if (!scannerCard) {
+        console.log('Card do scanner não encontrado');
+        return;
+    }
+    
+    let cardBody = scannerCard.querySelector('.card-body');
     if (!cardBody) return;
+    
     if (document.getElementById('uploadArea')) return;
     
     let uploadDiv = document.createElement('div');
@@ -345,93 +288,6 @@ async function processarUpload() {
     salvarProgresso();
     document.getElementById('uploadArquivo').value = '';
 }
-
-// Chamar a função ao iniciar a conferência
-let iniciarOriginal = document.getElementById('iniciarBtn').onclick;
-document.getElementById('iniciarBtn').onclick = function() {
-    iniciarOriginal();
-    setTimeout(adicionarUploadArquivo, 100);
-};
-    
-function processarEAN(cod) {
-    let achou = false;
-    for (let nota of dados.notas) {
-        for (let item of nota.itens) {
-            if (item.ean === cod) {
-                item.conf++;
-                achou = true;
-                let msg = item.conf === item.qtd ? '✅ CONFERIDO' : (item.conf > item.qtd ? '⚠️ SOBRA' : '🔄 PARCIAL');
-                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
-                document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
-                setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
-                atualizarTudo();
-                salvarProgresso();
-                break;
-            }
-        }
-        if (achou) break;
-    }
-    if (!achou) {
-        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">❌ Código ${cod} não encontrado!</div>`;
-        setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
-    }
-    scanner.value = '';
-    scanner.focus();
-    setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
-}
-
-// FUNÇÕES DA CÂMERA
-async function iniciarCamera() {
-    try {
-        videoStream = await navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } });
-        video.srcObject = videoStream;
-        await video.play();
-        
-        codeReader = new ZXing.BrowserMultiFormatReader();
-        codeReader.decodeFromVideoElement(video, (result, err) => {
-            if (result) {
-                let codigo = result.getText();
-                if (codigo && codigo.length >= 10) {
-                    // Extrair apenas números do código
-                    let numeros = codigo.replace(/\D/g, '');
-                    if (numeros.length >= 10) {
-                        scanner.value = numeros;
-                        processarEAN(numeros);
-                        fecharCamera();
-                    }
-                }
-            }
-        });
-    } catch (error) {
-        console.error('Erro ao iniciar câmera:', error);
-        alert('Não foi possível acessar a câmera. Verifique as permissões.');
-    }
-}
-
-function fecharCamera() {
-    if (codeReader) {
-        codeReader.reset();
-        codeReader = null;
-    }
-    if (videoStream) {
-        videoStream.getTracks().forEach(track => track.stop());
-        videoStream = null;
-    }
-    cameraArea.style.display = 'none';
-}
-
-document.getElementById('cameraBtn').onclick = () => {
-    cameraArea.style.display = 'flex';
-    iniciarCamera();
-};
-
-document.getElementById('closeCameraBtn').onclick = () => {
-    fecharCamera();
-};
-
-document.getElementById('capturarBtn').onclick = () => {
-    alert('Aponte a câmera para o código de barras. O sistema detecta automaticamente!');
-};
 
 document.getElementById('relatorioBtn').onclick = () => {
     let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
