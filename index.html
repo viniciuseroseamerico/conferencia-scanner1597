@@ -2,13 +2,73 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Conferência - Scanner</title>
+    <title>Conferência de Mercadorias</title>
     <style>
-        /* Seu CSS existente */
+        body { font-family: Arial; background: #1e3c72; padding: 20px; }
+        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1000px; margin: 0 auto; }
+        button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+        .drop-area { border: 2px dashed #1e3c72; padding: 30px; text-align: center; margin: 10px 0; cursor: pointer; background: #f8f9fa; }
+        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
+        .ok { background: #c6f6d5; padding: 10px; margin: 5px 0; border-left: 4px solid #48bb78; }
+        .erro { background: #fed7d7; padding: 10px; margin: 5px 0; border-left: 4px solid #e53e3e; }
+        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
+        .form-group { flex: 1; min-width: 150px; }
+        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
+        .nota-card { border-left: 3px solid #1e3c72; padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 5px; }
+        .ean-item { display: inline-block; background: #1e3c72; color: white; padding: 5px 10px; margin: 3px; border-radius: 3px; font-size: 11px; cursor: pointer; }
+        .progress-bar { background: #ddd; border-radius: 10px; height: 20px; overflow: hidden; margin: 10px 0; }
+        .progress-fill { background: #48bb78; height: 100%; width: 0%; }
+        .scanner-input { font-size: 18px; font-family: monospace; }
+        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
+        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
+        th { background: #1e3c72; color: white; }
+        .upload-area { background: #f0f4f8; padding: 10px; border-radius: 8px; margin-bottom: 15px; }
     </style>
 </head>
 <body>
-<!-- Seu HTML existente -->
+<div class="card">
+    <h2>📦 CONFERÊNCIA DE MERCADORIAS</h2>
+    <div class="form-row">
+        <div class="form-group"><label>Data:</label><input type="date" id="data"></div>
+        <div class="form-group"><label>Lacre:</label><input type="text" id="lacre"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Loja:</label><input type="text" id="lojaNum"></div>
+        <div class="form-group"><label>Nome Loja:</label><input type="text" id="lojaNome"></div>
+    </div>
+    <div class="form-row">
+        <div class="form-group"><label>Operador:</label><input type="text" id="operador"></div>
+        <div class="form-group"><label>Placa:</label><input type="text" id="placa"></div>
+    </div>
+    <button id="iniciarBtn">INICIAR</button>
+</div>
+
+<div id="conferenciaArea" style="display:none;">
+    <div class="card">
+        <div class="upload-area">
+            <strong>📁 CARREGAR ARQUIVOS</strong>
+            <input type="file" id="fileUpload" accept=".xls,.xlsx,.zip" multiple style="margin-top: 8px;">
+            <button id="uploadBtn" style="background: #48bb78; margin-top: 8px;">📤 PROCESSAR</button>
+            <div id="uploadStatus"></div>
+        </div>
+        <div id="dropArea" class="drop-area">📁 ARRASTE O ZIP OU EXCEL AQUI</div>
+        <div id="statusMsg"></div>
+    </div>
+    <div class="card"><div id="resumoDiv"></div></div>
+    <div class="card">
+        <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código (13 dígitos)" autofocus>
+        <div id="scanResultDiv"></div>
+    </div>
+    <div class="card">
+        <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
+        <div id="progressoTexto"></div>
+        <div id="notasDiv"></div>
+    </div>
+    <div class="card">
+        <button id="relatorioBtn">RELATÓRIO</button>
+        <button id="encerrarBtn">ENCERRAR</button>
+    </div>
+</div>
 
 <script src="https://cdn.sheetjs.com/xlsx-0.20.2/package/dist/xlsx.full.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
@@ -37,8 +97,7 @@ function restaurarProgresso() {
         document.querySelector('.card').style.display = 'none';
         document.getElementById('conferenciaArea').style.display = 'block';
         atualizarTudo();
-        document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado!</div>';
-        adicionarUploadArquivo();
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">Progresso restaurado!</div>';
         return true;
     }
     return false;
@@ -55,15 +114,13 @@ document.getElementById('iniciarBtn').onclick = () => {
     dados = { data, lacre, lojaNum, lojaNome, operador, placa: placa || 'N/A', notas: [] };
     document.querySelector('.card').style.display = 'none';
     document.getElementById('conferenciaArea').style.display = 'block';
-    setTimeout(adicionarUploadArquivo, 100);
 };
 
 function converterNumero(valor) {
     if (valor === undefined || valor === null) return 0;
     let str = String(valor).trim();
     str = str.replace(/\./g, '').replace(',', '.');
-    let num = parseFloat(str);
-    return isNaN(num) ? 0 : num;
+    return parseFloat(str) || 0;
 }
 
 function extrairDadosExcel(data, fileName) {
@@ -80,7 +137,7 @@ function extrairDadosExcel(data, fileName) {
         let valorTotal = converterNumero(linha[11]);
         if (ean && ean !== 'SEM GTIN' && ean.length >= 10 && qtd > 0 && !eansMap.has(ean)) {
             eansMap.set(ean, {
-                ean: ean, qtd: qtd, valorTotal: valorTotal,
+                ean, qtd, valorTotal,
                 custo: qtd > 0 ? valorTotal / qtd : 0,
                 codigo: linha[0] ? String(linha[0]).trim() : '',
                 desc: linha[1] ? String(linha[1]).trim().substring(0, 50) : '',
@@ -91,31 +148,60 @@ function extrairDadosExcel(data, fileName) {
     return { nfe, itens: Array.from(eansMap.values()), fileName };
 }
 
+async function processarArquivos(files) {
+    let notas = [];
+    for (let file of files) {
+        let ext = file.name.split('.').pop().toLowerCase();
+        if (ext === 'zip') {
+            let zip = await JSZip.loadAsync(await file.arrayBuffer());
+            for (let [nome, arq] of Object.entries(zip.files)) {
+                if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
+                    let nota = extrairDadosExcel(await arq.async('arraybuffer'), nome);
+                    if (nota.itens.length) notas.push(nota);
+                }
+            }
+        } else if (['xls', 'xlsx'].includes(ext)) {
+            let nota = extrairDadosExcel(await file.arrayBuffer(), file.name);
+            if (nota.itens.length) notas.push(nota);
+        }
+    }
+    return notas;
+}
+
+// Upload por botão
+document.getElementById('uploadBtn').onclick = async () => {
+    let files = document.getElementById('fileUpload').files;
+    if (files.length === 0) {
+        document.getElementById('uploadStatus').innerHTML = '<div class="erro">Selecione arquivos!</div>';
+        return;
+    }
+    document.getElementById('uploadStatus').innerHTML = '<div class="ok">Processando...</div>';
+    let notas = await processarArquivos(files);
+    if (notas.length === 0) {
+        document.getElementById('uploadStatus').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
+        return;
+    }
+    dados.notas = notas;
+    document.getElementById('uploadStatus').innerHTML = `<div class="ok">${notas.length} nota(s) carregadas!</div>`;
+    atualizarTudo();
+    salvarProgresso();
+};
+
+// Arrastar arquivos
 let dropArea = document.getElementById('dropArea');
 dropArea.ondragover = e => e.preventDefault();
 dropArea.ondrop = async e => {
     e.preventDefault();
-    let file = e.dataTransfer.files[0];
-    if (!file) return;
-    let ext = file.name.split('.').pop().toLowerCase();
-    let notas = [];
-    
-    if (ext === 'zip') {
-        let zip = await JSZip.loadAsync(await file.arrayBuffer());
-        for (let [nome, arq] of Object.entries(zip.files)) {
-            if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
-                let nota = extrairDadosExcel(await arq.async('arraybuffer'), nome);
-                if (nota.itens.length) notas.push(nota);
-            }
-        }
-    } else if (['xls', 'xlsx'].includes(ext)) {
-        let nota = extrairDadosExcel(await file.arrayBuffer(), file.name);
-        if (nota.itens.length) notas.push(nota);
+    let files = e.dataTransfer.files;
+    if (files.length === 0) return;
+    document.getElementById('statusMsg').innerHTML = '<div class="ok">Processando...</div>';
+    let notas = await processarArquivos(Array.from(files));
+    if (notas.length === 0) {
+        document.getElementById('statusMsg').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
+        return;
     }
-    
-    if (!notas.length) return document.getElementById('statusMsg').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
     dados.notas = notas;
-    document.getElementById('statusMsg').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
+    document.getElementById('statusMsg').innerHTML = `<div class="ok">${notas.length} nota(s) carregadas!</div>`;
     atualizarTudo();
     salvarProgresso();
 };
@@ -136,7 +222,7 @@ function atualizarTudo() {
         totalConf += tConf;
         let pct = tItens ? (tConf / tItens) * 100 : 0;
         let eansHtml = nota.itens.map(item => `<span class="ean-item" onclick="copiarEAN('${item.ean}')">${item.ean}</span>`).join('');
-        notasDiv.innerHTML += `<div class="nota-card"><strong>📄 NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
+        notasDiv.innerHTML += `<div class="nota-card"><strong>NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
             Itens: ${tConf}/${tItens} (${pct.toFixed(0)}%)<br>
             <div class="progress-bar" style="height:6px;"><div style="background:#48bb78; width:${pct}%; height:6px;"></div></div>
             <div><strong>EANs:</strong> ${eansHtml}</div></div>`;
@@ -144,7 +230,7 @@ function atualizarTudo() {
     let pctGeral = totalItens ? (totalConf / totalItens) * 100 : 0;
     document.getElementById('progressoBar').style.width = pctGeral + '%';
     document.getElementById('progressoTexto').innerHTML = `${pctGeral.toFixed(1)}% (${totalConf}/${totalItens} itens)`;
-    document.getElementById('resumoDiv').innerHTML = `<div class="ok">📊 Notas: ${dados.notas.length} | Itens: ${totalItens}</div>`;
+    document.getElementById('resumoDiv').innerHTML = `<div class="ok">Notas: ${dados.notas.length} | Itens: ${totalItens}</div>`;
 }
 
 function copiarEAN(ean) {
@@ -152,7 +238,6 @@ function copiarEAN(ean) {
     document.getElementById('scannerInput').focus();
 }
 
-// Scanner manual/teclado
 let scanner = document.getElementById('scannerInput');
 scanner.addEventListener('input', function(e) {
     let cod = e.target.value.trim();
@@ -170,9 +255,9 @@ function processarEAN(cod) {
             if (item.ean === cod) {
                 item.conf++;
                 achou = true;
-                let msg = item.conf === item.qtd ? '✅ CONFERIDO' : (item.conf > item.qtd ? '⚠️ SOBRA' : '🔄 PARCIAL');
+                let msg = item.conf === item.qtd ? 'CONFERIDO' : (item.conf > item.qtd ? 'SOBRA' : 'PARCIAL');
                 let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
-                document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
+                document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">${item.desc}<br>${item.conf}/${item.qtd} - ${msg}</div>`;
                 setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
                 atualizarTudo();
                 salvarProgresso();
@@ -182,7 +267,7 @@ function processarEAN(cod) {
         if (achou) break;
     }
     if (!achou) {
-        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">❌ Código ${cod} não encontrado!</div>`;
+        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">Codigo ${cod} nao encontrado!</div>`;
         setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
     }
     scanner.value = '';
@@ -190,107 +275,8 @@ function processarEAN(cod) {
     setTimeout(() => { processando = false; ultimoCodigo = ''; }, 100);
 }
 
-// =============================================
-// UPLOAD DE ARQUIVOS - VERSÃO CORRIGIDA
-// =============================================
-
-function adicionarUploadArquivo() {
-    // Procura o card do scanner de forma mais robusta
-    let scannerCard = null;
-    let cards = document.querySelectorAll('#conferenciaArea .card');
-    
-    for (let card of cards) {
-        let header = card.querySelector('.card-header');
-        if (header && header.innerText.includes('SCANNER')) {
-            scannerCard = card;
-            break;
-        }
-    }
-    
-    if (!scannerCard) {
-        // Se não encontrou pelo header, tenta pelo terceiro card
-        scannerCard = document.querySelector('#conferenciaArea .card:nth-child(3)');
-    }
-    
-    if (!scannerCard) {
-        console.log('Card do scanner não encontrado');
-        return;
-    }
-    
-    let cardBody = scannerCard.querySelector('.card-body');
-    if (!cardBody) return;
-    
-    if (document.getElementById('uploadArea')) return;
-    
-    let uploadDiv = document.createElement('div');
-    uploadDiv.id = 'uploadArea';
-    uploadDiv.style.marginBottom = '15px';
-    uploadDiv.style.padding = '10px';
-    uploadDiv.style.background = '#f0f4f8';
-    uploadDiv.style.borderRadius = '8px';
-    uploadDiv.innerHTML = `
-        <div style="font-weight: bold; margin-bottom: 8px;">📁 CARREGAR ARQUIVOS (PC/CELULAR)</div>
-        <input type="file" id="uploadArquivo" accept=".xls,.xlsx,.zip" multiple style="width: 100%; padding: 10px; margin-bottom: 8px; border: 1px solid #ddd; border-radius: 5px;">
-        <button id="uploadBtn" style="background: #48bb78; width: 100%; padding: 10px;">📤 CARREGAR E PROCESSAR</button>
-        <div id="uploadStatus" style="margin-top: 8px; font-size: 12px;"></div>
-    `;
-    
-    cardBody.insertBefore(uploadDiv, cardBody.firstChild);
-    
-    document.getElementById('uploadBtn').onclick = processarUpload;
-}
-
-async function processarUpload() {
-    let files = document.getElementById('uploadArquivo').files;
-    let statusDiv = document.getElementById('uploadStatus');
-    
-    if (files.length === 0) {
-        statusDiv.innerHTML = '<div class="erro">Selecione pelo menos um arquivo!</div>';
-        return;
-    }
-    
-    statusDiv.innerHTML = '<div class="ok">⏳ Processando ' + files.length + ' arquivo(s)...</div>';
-    
-    let notas = [];
-    
-    for (let file of files) {
-        let ext = file.name.split('.').pop().toLowerCase();
-        
-        if (ext === 'zip') {
-            try {
-                let zipData = await file.arrayBuffer();
-                let zip = await JSZip.loadAsync(zipData);
-                for (let [nome, arq] of Object.entries(zip.files)) {
-                    if (!arq.dir && (nome.endsWith('.xls') || nome.endsWith('.xlsx'))) {
-                        let dadosArquivo = await arq.async('arraybuffer');
-                        let nota = extrairDadosExcel(dadosArquivo, nome);
-                        if (nota.itens.length) notas.push(nota);
-                    }
-                }
-            } catch(e) {
-                statusDiv.innerHTML = '<div class="erro">Erro no ZIP: ' + file.name + '</div>';
-            }
-        } else if (['xls', 'xlsx'].includes(ext)) {
-            let data = await file.arrayBuffer();
-            let nota = extrairDadosExcel(data, file.name);
-            if (nota.itens.length) notas.push(nota);
-        }
-    }
-    
-    if (notas.length === 0) {
-        statusDiv.innerHTML = '<div class="erro">Nenhum dado encontrado nos arquivos!</div>';
-        return;
-    }
-    
-    dados.notas = notas;
-    statusDiv.innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas com sucesso!</div>`;
-    atualizarTudo();
-    salvarProgresso();
-    document.getElementById('uploadArquivo').value = '';
-}
-
 document.getElementById('relatorioBtn').onclick = () => {
-    let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
+    let html = `<h2>RELATORIO DE DIVERGENCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
     let totalPrejuizo = 0;
     for (let nota of dados.notas) {
         let divs = [];
@@ -313,18 +299,18 @@ document.getElementById('relatorioBtn').onclick = () => {
             }
         }
         if (divs.length) {
-            html += `<h3>NFe ${nota.nfe}</h3><table border="1"><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuízo</th></tr>${divs.join('')}</table><p>Prejuízo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
+            html += `<h3>NFe ${nota.nfe}</h3><table border="1"><tr><th>Codigo</th><th>Descricao</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuizo</th></tr>${divs.join('')}</table><p>Prejuizo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
             totalPrejuizo += prejuizoNota;
         }
     }
-    html += `<hr><h3>Prejuízo total: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
+    html += `<hr><h3>Prejuizo total: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
     let win = window.open('', '_blank');
-    win.document.write(`<html><head><title>Relatório</title><style>body{font-family:Arial;margin:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#1e3c72;color:white}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
+    win.document.write(`<html><head><title>Relatorio</title><style>body{font-family:Arial;margin:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#1e3c72;color:white}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
     win.document.close();
 };
 
 document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga?')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
-window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferência?')) restaurarProgresso(); };
+window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferencia?')) restaurarProgresso(); };
 </script>
 </body>
 </html>
