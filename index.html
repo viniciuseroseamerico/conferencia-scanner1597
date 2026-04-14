@@ -117,7 +117,16 @@ document.getElementById('iniciarBtn').onclick = () => {
 function converterNumero(valor) {
     if (valor === undefined || valor === null) return 0;
     let str = String(valor).trim();
-    str = str.replace(/\./g, '').replace(',', '.');
+    
+    // Verifica se tem vírgula (formato brasileiro)
+    if (str.includes(',')) {
+        // Remove pontos (separador de milhar) e troca vírgula por ponto
+        str = str.replace(/\./g, '').replace(',', '.');
+    } else {
+        // Se não tem vírgula, mantém como está (já pode ser formato americano)
+        str = str.replace(/\./g, '');
+    }
+    
     let num = parseFloat(str);
     return isNaN(num) ? 0 : num;
 }
