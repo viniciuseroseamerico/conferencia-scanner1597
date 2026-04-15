@@ -2,67 +2,297 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Conferência</title>
+    <title>Conferência de Mercadorias</title>
     <style>
-        body { font-family: Arial; background: #1e3c72; padding: 20px; }
-        .card { background: white; border-radius: 10px; padding: 20px; margin-bottom: 20px; max-width: 1000px; margin: 0 auto; }
-        button { background: #1e3c72; color: white; padding: 10px 20px; border: none; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-        .drop-area { border: 2px dashed #1e3c72; padding: 30px; text-align: center; margin: 10px 0; cursor: pointer; background: #f8f9fa; }
-        input { width: 100%; padding: 12px; margin: 10px 0; border: 1px solid #ddd; border-radius: 5px; }
-        .ok { background: #c6f6d5; padding: 10px; margin: 5px 0; border-left: 4px solid #48bb78; }
-        .erro { background: #fed7d7; padding: 10px; margin: 5px 0; border-left: 4px solid #e53e3e; }
-        .form-row { display: flex; gap: 15px; flex-wrap: wrap; }
-        .form-group { flex: 1; min-width: 150px; }
-        .form-group label { display: block; font-weight: bold; margin-bottom: 5px; }
-        .nota-card { border-left: 3px solid #1e3c72; padding: 10px; margin: 5px 0; background: #f0f0f0; border-radius: 5px; }
-        .ean-item { display: inline-block; background: #1e3c72; color: white; padding: 5px 10px; margin: 3px; border-radius: 3px; font-size: 11px; cursor: pointer; }
-        .progress-bar { background: #ddd; border-radius: 10px; height: 20px; overflow: hidden; margin: 10px 0; }
-        .progress-fill { background: #48bb78; height: 100%; width: 0%; }
-        .scanner-input { font-size: 18px; font-family: monospace; }
-        table { width: 100%; border-collapse: collapse; margin: 15px 0; font-size: 12px; }
-        th, td { border: 1px solid #aaa; padding: 8px; text-align: left; }
-        th { background: #1e3c72; color: white; }
+        /* TEMA ESCURO ESTILO SAP */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #1a1a2e;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        /* Cards estilo SAP */
+        .card {
+            background: #16213e;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            overflow: hidden;
+            border: 1px solid #0f3460;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3);
+        }
+        
+        .card-header {
+            background: #0f3460;
+            color: #e94560;
+            padding: 12px 20px;
+            font-weight: bold;
+            font-size: 14px;
+            letter-spacing: 0.5px;
+            border-bottom: 1px solid #1a1a2e;
+        }
+        
+        .card-body {
+            padding: 20px;
+        }
+        
+        /* Formulário */
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .form-group {
+            flex: 1;
+            min-width: 180px;
+        }
+        
+        .form-group label {
+            display: block;
+            font-weight: bold;
+            margin-bottom: 5px;
+            color: #e0e0e0;
+            font-size: 12px;
+        }
+        
+        .form-control, input {
+            width: 100%;
+            padding: 10px;
+            background: #0f3460;
+            border: 1px solid #2a4a7a;
+            border-radius: 4px;
+            color: #e0e0e0;
+            font-size: 14px;
+        }
+        
+        .form-control:focus, input:focus {
+            outline: none;
+            border-color: #e94560;
+        }
+        
+        /* Botões */
+        button {
+            background: #e94560;
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 13px;
+            transition: all 0.3s;
+        }
+        
+        button:hover {
+            background: #ff6b6b;
+            transform: translateY(-1px);
+        }
+        
+        .btn-secondary {
+            background: #0f3460;
+            border: 1px solid #e94560;
+        }
+        
+        .btn-secondary:hover {
+            background: #1a4a7a;
+        }
+        
+        .btn-danger {
+            background: #c0392b;
+        }
+        
+        .btn-danger:hover {
+            background: #e74c3c;
+        }
+        
+        /* Drop Area */
+        .drop-area {
+            border: 2px dashed #e94560;
+            border-radius: 8px;
+            padding: 30px;
+            text-align: center;
+            margin: 10px 0;
+            cursor: pointer;
+            background: #0f3460;
+            color: #e0e0e0;
+        }
+        
+        .drop-area.drag-over {
+            border-color: #48bb78;
+            background: #1a4a7a;
+        }
+        
+        /* Mensagens */
+        .ok {
+            background: #1a4a7a;
+            color: #48bb78;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #48bb78;
+            border-radius: 4px;
+        }
+        
+        .erro {
+            background: #1a4a7a;
+            color: #e94560;
+            padding: 10px;
+            margin: 5px 0;
+            border-left: 4px solid #e94560;
+            border-radius: 4px;
+        }
+        
+        /* Notas e Progresso */
+        .nota-card {
+            background: #0f3460;
+            border-left: 4px solid #e94560;
+            padding: 12px;
+            margin: 10px 0;
+            border-radius: 4px;
+            color: #e0e0e0;
+        }
+        
+        .ean-item {
+            display: inline-block;
+            background: #e94560;
+            color: white;
+            padding: 4px 10px;
+            margin: 3px;
+            border-radius: 4px;
+            font-size: 11px;
+            cursor: pointer;
+            font-family: monospace;
+        }
+        
+        .ean-item:hover {
+            background: #ff6b6b;
+        }
+        
+        .progress-bar {
+            background: #0f3460;
+            border-radius: 10px;
+            height: 20px;
+            overflow: hidden;
+            margin: 10px 0;
+        }
+        
+        .progress-fill {
+            background: #e94560;
+            height: 100%;
+            width: 0%;
+            transition: width 0.3s;
+        }
+        
+        .scanner-input {
+            font-size: 18px;
+            font-family: monospace;
+            background: #0f3460;
+            border: 1px solid #e94560;
+            color: #e0e0e0;
+        }
+        
+        /* Tabela Relatório */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+            font-size: 12px;
+        }
+        
+        th, td {
+            border: 1px solid #2a4a7a;
+            padding: 8px;
+            text-align: left;
+            color: #e0e0e0;
+        }
+        
+        th {
+            background: #0f3460;
+            color: #e94560;
+        }
+        
+        h2, h3 {
+            color: #e94560;
+        }
+        
+        p, label {
+            color: #e0e0e0;
+        }
+        
+        hr {
+            border-color: #2a4a7a;
+        }
     </style>
 </head>
 <body>
-<div class="card">
-    <h2>📦 CONFERÊNCIA DE MERCADORIAS</h2>
-    <div class="form-row">
-        <div class="form-group"><label>Data:</label><input type="date" id="data"></div>
-        <div class="form-group"><label>Lacre:</label><input type="text" id="lacre"></div>
+<div class="container">
+    <div class="card">
+        <div class="card-header">📦 CONFERÊNCIA DE MERCADORIAS</div>
+        <div class="card-body">
+            <div class="form-row">
+                <div class="form-group"><label>DATA:</label><input type="date" id="data" class="form-control"></div>
+                <div class="form-group"><label>LACRE:</label><input type="text" id="lacre" class="form-control" placeholder="Ex: 001558"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>LOJA:</label><input type="text" id="lojaNum" class="form-control" placeholder="Nº Loja"></div>
+                <div class="form-group"><label>NOME LOJA:</label><input type="text" id="lojaNome" class="form-control" placeholder="Nome da Loja"></div>
+            </div>
+            <div class="form-row">
+                <div class="form-group"><label>OPERADOR:</label><input type="text" id="operador" class="form-control" placeholder="Nome do Operador"></div>
+                <div class="form-group"><label>PLACA:</label><input type="text" id="placa" class="form-control" placeholder="Placa do Veículo"></div>
+            </div>
+            <button id="iniciarBtn">▶ INICIAR CONFERÊNCIA</button>
+        </div>
     </div>
-    <div class="form-row">
-        <div class="form-group"><label>Loja:</label><input type="text" id="lojaNum"></div>
-        <div class="form-group"><label>Nome Loja:</label><input type="text" id="lojaNome"></div>
-    </div>
-    <div class="form-row">
-        <div class="form-group"><label>Operador:</label><input type="text" id="operador"></div>
-        <div class="form-group"><label>Placa:</label><input type="text" id="placa"></div>
-    </div>
-    <button id="iniciarBtn">INICIAR</button>
-</div>
 
-<div id="conferenciaArea" style="display:none;">
-    <div class="card">
-        <input type="file" id="fileUpload" accept=".xls,.xlsx,.zip" multiple style="margin: 5px 0;">
-        <button id="uploadBtn" style="background: #48bb78;">CARREGAR ARQUIVOS</button>
-        <div id="uploadStatus" style="margin-top: 5px;"></div>
-        <div id="dropArea" class="drop-area">OU ARRASTE O ZIP OU EXCEL AQUI</div>
-        <div id="statusMsg"></div>
-    </div>
-    <div class="card"><div id="resumoDiv"></div></div>
-    <div class="card">
-        <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código (13 dígitos)" autofocus>
-        <div id="scanResultDiv"></div>
-    </div>
-    <div class="card">
-        <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
-        <div id="progressoTexto"></div>
-        <div id="notasDiv"></div>
-    </div>
-    <div class="card">
-        <button id="relatorioBtn">RELATÓRIO</button>
-        <button id="encerrarBtn">ENCERRAR</button>
+    <div id="conferenciaArea" style="display:none;">
+        <div class="card">
+            <div class="card-header">📁 IMPORTAR ARQUIVOS</div>
+            <div class="card-body">
+                <input type="file" id="fileUpload" accept=".xls,.xlsx,.zip" multiple style="width:100%; margin-bottom:10px;">
+                <button id="uploadBtn" style="background:#48bb78;">📤 CARREGAR</button>
+                <div id="uploadStatus" style="margin-top:10px;"></div>
+                <div id="dropArea" class="drop-area">📁 ARRASTE ARQUIVOS AQUI</div>
+                <div id="statusMsg"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">📊 RESUMO</div>
+            <div class="card-body"><div id="resumoDiv"></div></div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">🔍 SCANNER</div>
+            <div class="card-body">
+                <input type="text" id="scannerInput" class="scanner-input" placeholder="Escaneie o código EAN (13 dígitos)" autofocus>
+                <div id="scanResultDiv" style="margin-top:10px;"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">📈 PROGRESSO</div>
+            <div class="card-body">
+                <div class="progress-bar"><div id="progressoBar" class="progress-fill"></div></div>
+                <div id="progressoTexto" style="text-align:center; margin:5px 0;"></div>
+                <div id="notasDiv"></div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">📑 FINALIZAR</div>
+            <div class="card-body">
+                <button id="relatorioBtn">📄 RELATÓRIO</button>
+                <button id="encerrarBtn" class="btn-danger">🗑️ ENCERRAR</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -93,7 +323,7 @@ function restaurarProgresso() {
         document.querySelector('.card').style.display = 'none';
         document.getElementById('conferenciaArea').style.display = 'block';
         atualizarTudo();
-        document.getElementById('statusMsg').innerHTML = '<div class="ok">Progresso restaurado!</div>';
+        document.getElementById('statusMsg').innerHTML = '<div class="ok">✅ Progresso restaurado!</div>';
         return true;
     }
     return false;
@@ -164,40 +394,38 @@ async function processarArquivos(files) {
     return notas;
 }
 
-// Upload por botão
 document.getElementById('uploadBtn').onclick = async () => {
     let files = document.getElementById('fileUpload').files;
     if (files.length === 0) {
-        document.getElementById('uploadStatus').innerHTML = '<div class="erro">Selecione arquivos!</div>';
+        document.getElementById('uploadStatus').innerHTML = '<div class="erro">❌ Selecione arquivos!</div>';
         return;
     }
-    document.getElementById('uploadStatus').innerHTML = '<div class="ok">Processando...</div>';
+    document.getElementById('uploadStatus').innerHTML = '<div class="ok">⏳ Processando...</div>';
     let notas = await processarArquivos(Array.from(files));
     if (notas.length === 0) {
-        document.getElementById('uploadStatus').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
+        document.getElementById('uploadStatus').innerHTML = '<div class="erro">❌ Nenhum dado encontrado!</div>';
         return;
     }
     dados.notas = notas;
-    document.getElementById('uploadStatus').innerHTML = `<div class="ok">${notas.length} nota(s) carregadas!</div>`;
+    document.getElementById('uploadStatus').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
     atualizarTudo();
     salvarProgresso();
 };
 
-// Arrastar arquivos
 let dropArea = document.getElementById('dropArea');
 dropArea.ondragover = e => e.preventDefault();
 dropArea.ondrop = async e => {
     e.preventDefault();
     let files = e.dataTransfer.files;
     if (files.length === 0) return;
-    document.getElementById('statusMsg').innerHTML = '<div class="ok">Processando...</div>';
+    document.getElementById('statusMsg').innerHTML = '<div class="ok">⏳ Processando...</div>';
     let notas = await processarArquivos(Array.from(files));
     if (notas.length === 0) {
-        document.getElementById('statusMsg').innerHTML = '<div class="erro">Nenhum dado encontrado!</div>';
+        document.getElementById('statusMsg').innerHTML = '<div class="erro">❌ Nenhum dado encontrado!</div>';
         return;
     }
     dados.notas = notas;
-    document.getElementById('statusMsg').innerHTML = `<div class="ok">${notas.length} nota(s) carregadas!</div>`;
+    document.getElementById('statusMsg').innerHTML = `<div class="ok">✅ ${notas.length} nota(s) carregadas!</div>`;
     atualizarTudo();
     salvarProgresso();
 };
@@ -218,15 +446,15 @@ function atualizarTudo() {
         totalConf += tConf;
         let pct = tItens ? (tConf / tItens) * 100 : 0;
         let eansHtml = nota.itens.map(item => `<span class="ean-item" onclick="copiarEAN('${item.ean}')">${item.ean}</span>`).join('');
-        notasDiv.innerHTML += `<div class="nota-card"><strong>NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
+        notasDiv.innerHTML += `<div class="nota-card"><strong>📄 NFe: ${nota.nfe}</strong> | Valor: R$ ${valorNota.toFixed(2)}<br>
             Itens: ${tConf}/${tItens} (${pct.toFixed(0)}%)<br>
-            <div class="progress-bar" style="height:6px;"><div style="background:#48bb78; width:${pct}%; height:6px;"></div></div>
+            <div class="progress-bar" style="height:6px;"><div style="background:#e94560; width:${pct}%; height:6px;"></div></div>
             <div><strong>EANs:</strong> ${eansHtml}</div></div>`;
     }
     let pctGeral = totalItens ? (totalConf / totalItens) * 100 : 0;
     document.getElementById('progressoBar').style.width = pctGeral + '%';
     document.getElementById('progressoTexto').innerHTML = `${pctGeral.toFixed(1)}% (${totalConf}/${totalItens} itens)`;
-    document.getElementById('resumoDiv').innerHTML = `<div class="ok">Notas: ${dados.notas.length} | Itens: ${totalItens}</div>`;
+    document.getElementById('resumoDiv').innerHTML = `<div class="ok">📊 Notas: ${dados.notas.length} | Itens: ${totalItens}</div>`;
 }
 
 function copiarEAN(ean) {
@@ -252,8 +480,8 @@ function processarEAN(cod) {
                 item.conf++;
                 achou = true;
                 let msg = item.conf === item.qtd ? 'CONFERIDO' : (item.conf > item.qtd ? 'SOBRA' : 'PARCIAL');
-                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#ed8936' : '#4299e1');
-                document.getElementById('scanResultDiv').innerHTML = `<div style="background:${cor}; color:white; padding:10px; border-radius:5px;">${item.desc}<br>${item.conf}/${item.qtd} - ${msg}</div>`;
+                let cor = item.conf === item.qtd ? '#48bb78' : (item.conf > item.qtd ? '#e94560' : '#f39c12');
+                document.getElementById('scanResultDiv').innerHTML = `<div style="background:#1a4a7a; color:${cor}; padding:10px; border-radius:5px; border-left:4px solid ${cor};">📦 ${item.desc}<br>📊 ${item.conf}/${item.qtd} - ${msg}</div>`;
                 setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
                 atualizarTudo();
                 salvarProgresso();
@@ -263,7 +491,7 @@ function processarEAN(cod) {
         if (achou) break;
     }
     if (!achou) {
-        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#e53e3e; color:white; padding:10px; border-radius:5px;">Codigo ${cod} nao encontrado!</div>`;
+        document.getElementById('scanResultDiv').innerHTML = `<div style="background:#1a4a7a; color:#e94560; padding:10px; border-radius:5px; border-left:4px solid #e94560;">❌ Código ${cod} não encontrado!</div>`;
         setTimeout(() => document.getElementById('scanResultDiv').innerHTML = '', 1500);
     }
     scanner.value = '';
@@ -272,7 +500,7 @@ function processarEAN(cod) {
 }
 
 document.getElementById('relatorioBtn').onclick = () => {
-    let html = `<h2>RELATORIO DE DIVERGENCIAS</h2><hr><p>Data: ${dados.data} | Lacre: ${dados.lacre}</p><p>Loja: ${dados.lojaNum} - ${dados.lojaNome} | Operador: ${dados.operador} | Placa: ${dados.placa}</p><hr>`;
+    let html = `<h2>RELATÓRIO DE DIVERGÊNCIAS</h2><hr><p><strong>Data:</strong> ${dados.data} | <strong>Lacre:</strong> ${dados.lacre}</p><p><strong>Loja:</strong> ${dados.lojaNum} - ${dados.lojaNome} | <strong>Operador:</strong> ${dados.operador} | <strong>Placa:</strong> ${dados.placa}</p><hr>`;
     let totalPrejuizo = 0;
     for (let nota of dados.notas) {
         let divs = [];
@@ -291,22 +519,22 @@ document.getElementById('relatorioBtn').onclick = () => {
                     <td style="text-align:center">${Math.abs(diff)}</td
                     <td style="text-align:center">${diff<0?'FALTA':'SOBRA'}</td
                     <td style="text-align:center">R$ ${prej.toFixed(2)}</td
-                </td>`);
+                </tr>`);
             }
         }
         if (divs.length) {
-            html += `<h3>NFe ${nota.nfe}</h3><table border="1"><tr><th>Codigo</th><th>Descricao</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuizo</th></tr>${divs.join('')}</table><p>Prejuizo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
+            html += `<h3>📄 NFe ${nota.nfe}</h3><table><tr><th>Código</th><th>Descrição</th><th>EAN</th><th>Nota</th><th>Conf</th><th>Dif</th><th>Tipo</th><th>Prejuízo</th></tr>${divs.join('')}<td><p>Prejuízo da nota: R$ ${prejuizoNota.toFixed(2)}</p>`;
             totalPrejuizo += prejuizoNota;
         }
     }
-    html += `<hr><h3>Prejuizo total: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
+    html += `<hr><h3>📊 PREJUÍZO TOTAL: R$ ${totalPrejuizo.toFixed(2)}</h3>`;
     let win = window.open('', '_blank');
-    win.document.write(`<html><head><title>Relatorio</title><style>body{font-family:Arial;margin:20px}table{border-collapse:collapse;width:100%}td,th{border:1px solid #ccc;padding:8px}th{background:#1e3c72;color:white}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
+    win.document.write(`<html><head><title>Relatório</title><style>body{font-family:Arial;margin:20px;background:#1a1a2e;color:#e0e0e0;}table{border-collapse:collapse;width:100%}td,th{border:1px solid #2a4a7a;padding:8px}th{background:#0f3460;color:#e94560}h2,h3{color:#e94560}</style></head><body>${html}<script>window.onload=()=>setTimeout(()=>window.print(),500)<\/script></body></html>`);
     win.document.close();
 };
 
-document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga?')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
-window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferencia?')) restaurarProgresso(); };
+document.getElementById('encerrarBtn').onclick = () => { if(confirm('Encerrar carga? Todos os dados serão apagados!')) { localStorage.removeItem('conferenciaProgresso'); location.reload(); } };
+window.onload = () => { if(localStorage.getItem('conferenciaProgresso')) if(confirm('Restaurar conferência?')) restaurarProgresso(); };
 </script>
 </body>
 </html>
